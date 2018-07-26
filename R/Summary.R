@@ -30,7 +30,7 @@ Summary <- function(data){
 
   # idx
   date_idx <- sapply(data, is.date)
-  num_idx <- sapply(data, is.number)
+  num_idx <- sapply(data, is.numerical)
   char_idx <- sapply(data, is.categorical)
 
   # data
