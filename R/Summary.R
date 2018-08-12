@@ -1,11 +1,4 @@
 Summary <- function(data){
-  is.categorical <- function(x){
-    if(is.character(x) | is.ordered(x) | is.factor(x)){
-      return(T)
-    } else {
-      return(F)
-    }
-  }
   Card <- function(x) length(table(x))
   NofNA <- function(x) sum(is.na(x))
   Q1 <- function(x, na.rm=T) quantile(x, 0.25, na.rm = na.rm)
