@@ -10,3 +10,4 @@ Impurity <- function(x, impurity.measure = c("gini")){
   }
   return(impurity)
 }
+1+1
