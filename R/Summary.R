@@ -71,5 +71,5 @@ Summary <- function(data){
   }
   char_result <- char_result[c(1:7, 10, 8, 9, 11)]
 
-  return(list(num_result, char_result, date_result))
+  return(list(numerical = num_result, categorical = char_result, date = date_result))
 }
