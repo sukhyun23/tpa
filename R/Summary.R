@@ -28,6 +28,9 @@ Summary <- function(data){
 
   # data
   date_dat <- data[date_idx]
+  for(i in names(date_dat[sapply(date_dat, lubridate::is.Date)])){
+    date_dat[[i]] <- as.POSIXct(date_dat[[i]])
+  }
   num_dat <- data[num_idx]
   char_dat <- data[char_idx]
 
@@ -41,7 +44,7 @@ Summary <- function(data){
       data.frame(t(sapply(date_dat, summary)))
     )
     names(date_result)[6:11] <- c('Min.', '1st Qu.', 'Median', 'Mean', '3rd Qu.', 'Max.')
-    for(i in 6:11) date_result[[i]] <- as.Date(date_result[[i]], origin='1970-1-1')
+    for(i in 6:11) date_result[[i]] <- as.POSIXct(date_result[[i]], origin='1970-01-01')
   }
 
   # numerical
