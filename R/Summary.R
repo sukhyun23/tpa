@@ -16,7 +16,7 @@ Summary <- function(data){
   reserved_words <- c("if", "else", "while", "function", "for",
                       "in", "next", "break", " TRUE", "FALSE", "NULL", "Inf",
                       "NaN", "NA")
-  if (sum(names(data) %in% reserved_words) != 0) {
+  if (sum(names(data) %in% reserved_words) != 0){
     stop("변수명은 예약어로 사용할 수 없습니다.\n 예약어 : if, else, while,\n
          function, for, in, next, break, TRUE, FALSE, NULL, Inf, NaN, NA")
   }
