@@ -1,4 +1,5 @@
 Summary <- function(data){
+  # functions
   Card <- function(x) length(table(x))
   NofNA <- function(x) sum(is.na(x))
   Q1 <- function(x, na.rm=T) quantile(x, 0.25, na.rm = na.rm)
@@ -27,10 +28,8 @@ Summary <- function(data){
   char_idx <- sapply(data, is.categorical)
 
   # data
+  data <- data.frame(data)
   date_dat <- data[date_idx]
-  for(i in names(date_dat[sapply(date_dat, lubridate::is.Date)])){
-    date_dat[[i]] <- as.POSIXct(date_dat[[i]])
-  }
   num_dat <- data[num_idx]
   char_dat <- data[char_idx]
 
@@ -39,6 +38,9 @@ Summary <- function(data){
   if(ncol(date_dat)==0){
     date_result <- NA
   } else {
+    for(i in names(date_dat[sapply(date_dat, lubridate::is.Date)])){
+      date_dat[[i]] <- as.POSIXct(date_dat[[i]])
+    }
     date_result <- cbind(
       data.frame(t(sapply(date_dat, BasicInfo))),
       data.frame(t(sapply(date_dat, summary)))
