@@ -57,7 +57,7 @@ Summary.default <- function(data){
   if(ncol(num_dat)==0){
     num_result <- NA
   } else {
-    num_result <- cbind(t(sapply(num_dat, BasicInfo)), t(sapply(num_dat, summary)))
+    num_result <- data.frame(cbind(t(sapply(num_dat, BasicInfo)), t(sapply(num_dat, summary))))
   }
 
   # categorical
@@ -139,7 +139,7 @@ Summary.data.table <- function(data) {
   if(ncol(num_dat)==0){
     num_result <- NA
   } else {
-    num_result <- cbind(t(sapply(num_dat, BasicInfo)), t(sapply(num_dat, summary)))
+    num_result <- data.frame(cbind(t(sapply(num_dat, BasicInfo)), t(sapply(num_dat, summary))))
   }
 
   # categorical
