@@ -82,7 +82,7 @@ Summary.default <- function(data){
   char_result <- char_result[c(1:7, 10, 8, 9, 11)]
 
   result <- list(numerical = num_result, categorical = char_result, date = date_result)
-  structure(result, class = 'Summary')
+  result <- structure(result, class = 'Summary')
   return(result)
 }
 
@@ -167,6 +167,6 @@ Summary.data.table <- function(data) {
   char_result <- data.frame(char_result[c(1:7, 10, 8, 9, 11)])
 
   result <- list(numerical = num_result, categorical = char_result, date = date_result)
-  structure(result, class = 'Summary')
+  result <- structure(result, class = 'Summary')
   return(result)
 }
