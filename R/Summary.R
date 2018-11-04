@@ -49,7 +49,7 @@ Summary.default <- function(data){
       data.frame(t(sapply(date_dat, BasicInfo))),
       data.frame(t(sapply(date_dat, summary)))
     )
-    names(date_result)[6:11] <- c('Min.', '1st Qu.', 'Median', 'Mean', '3rd Qu.', 'Max.')
+    names(date_result)[6:11] <- c('Min.', 'Q1', 'Median', 'Mean', 'Q3', 'Max.')
     for(i in 6:11) date_result[[i]] <- as.POSIXct(date_result[[i]], origin='1970-01-01')
   }
 
@@ -58,6 +58,7 @@ Summary.default <- function(data){
     num_result <- NA
   } else {
     num_result <- data.frame(cbind(t(sapply(num_dat, BasicInfo)), t(sapply(num_dat, summary))))
+    names(num_result)[6:11] <- c('Min.', 'Q1', 'Median', 'Mean', 'Q3', 'Max.')
   }
 
   # categorical
@@ -80,7 +81,9 @@ Summary.default <- function(data){
   }
   char_result <- char_result[c(1:7, 10, 8, 9, 11)]
 
-  return(list(numerical = num_result, categorical = char_result, date = date_result))
+  result <- list(numerical = num_result, categorical = char_result, date = date_result)
+  structure(result, class = 'Summary')
+  return(result)
 }
 
 
@@ -131,7 +134,7 @@ Summary.data.table <- function(data) {
       data.frame(t(sapply(date_dat, BasicInfo))),
       data.frame(t(sapply(date_dat, summary)))
     )
-    names(date_result)[6:11] <- c('Min.', '1st Qu.', 'Median', 'Mean', '3rd Qu.', 'Max.')
+    names(date_result)[6:11] <- c('Min.', 'Q1', 'Median', 'Mean', 'Q3', 'Max.')
     for(i in 6:11) date_result[[i]] <- as.POSIXct(date_result[[i]], origin='1970-01-01')
   }
 
@@ -140,6 +143,7 @@ Summary.data.table <- function(data) {
     num_result <- NA
   } else {
     num_result <- data.frame(cbind(t(sapply(num_dat, BasicInfo)), t(sapply(num_dat, summary))))
+    names(num_result)[6:11] <- c('Min.', 'Q1', 'Median', 'Mean', 'Q3', 'Max.')
   }
 
   # categorical
@@ -160,7 +164,9 @@ Summary.data.table <- function(data) {
     char_result$FMode_R <- char_result$FMode_C/char_result$n
     char_result$SMode_R <- char_result$SMode_C/char_result$n
   }
-  char_result <- char_result[c(1:7, 10, 8, 9, 11)]
+  char_result <- data.frame(char_result[c(1:7, 10, 8, 9, 11)])
 
-  return(list(numerical = num_result, categorical = char_result, date = date_result))
+  result <- list(numerical = num_result, categorical = char_result, date = date_result)
+  structure(result, class = 'Summary')
+  return(result)
 }
