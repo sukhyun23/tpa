@@ -170,3 +170,28 @@ Summary.data.table <- function(data) {
   result <- structure(result, class = 'Summary')
   return(result)
 }
+
+
+plot.Summary <- function(summary_obj) {
+  for(i in c('numerical', 'categorical', 'date')){
+    summary_obj[[i]]$Variable <- rownames(summary_obj[[i]])
+    summary_obj[[i]]$type <- i
+  }
+
+  gdat <- do.call(rbind, lapply(summary_obj, function(data) data[c('Variable', 'Miss_R', 'type')]))
+  bar_missing <- geom_bar(aes(x=reorder(Variable, -gdat$Miss_R), y=Miss_R, fill=type), stat='identity')
+  scale_y <- scale_y_continuous(limits = c(0,1), breaks = c(0, 0.25, 0.5, 0.75, 1),
+                                labels = c('0', '25', '50', '75', '100'))
+  scale_fill <- scale_fill_manual(values = c('dodgerblue4', 'deeppink4', 'gray50'))
+  xylab <- labs(x='Variables', y='Missing Ratio(%)')
+  theme1 <- theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1),
+                  panel.background = element_rect(fill='white'),
+                  panel.grid.major.y = element_line(color='gray75'),
+                  axis.ticks = element_blank())
+  ggplot(gdat) +
+    bar_missing +
+    scale_y +
+    scale_fill +
+    xylab +
+    theme1
+}
