@@ -1,9 +1,11 @@
+# Data Quality Report
+
 # create s3 class
-Summary <- function(x) UseMethod('Summary')
+DQR <- function(x) UseMethod('DQR')
 
 
 # default function
-Summary.default <- function(data){
+DQR.default <- function(data){
   # functions
   Card <- function(x) length(table(x))
   NofNA <- function(x) sum(is.na(x))
@@ -82,13 +84,13 @@ Summary.default <- function(data){
   char_result <- char_result[c(1:7, 10, 8, 9, 11)]
 
   result <- list(numerical = num_result, categorical = char_result, date = date_result)
-  result <- structure(result, class = 'Summary')
+  result <- structure(result, class = 'DQR')
   return(result)
 }
 
 
 # data.table class
-Summary.data.table <- function(data) {
+DQR.data.table <- function(data) {
   # functions
   Card <- function(x) length(table(x))
   NofNA <- function(x) sum(is.na(x))
@@ -167,18 +169,18 @@ Summary.data.table <- function(data) {
   char_result <- data.frame(char_result[c(1:7, 10, 8, 9, 11)])
 
   result <- list(numerical = num_result, categorical = char_result, date = date_result)
-  result <- structure(result, class = 'Summary')
+  result <- structure(result, class = 'DQR')
   return(result)
 }
 
 
-plot.Summary <- function(summary_obj) {
+plot.DQR <- function(DQR) {
   for(i in c('numerical', 'categorical', 'date')){
-    summary_obj[[i]]$Variable <- rownames(summary_obj[[i]])
-    summary_obj[[i]]$type <- i
+    DQR[[i]]$Variable <- rownames(DQR[[i]])
+    DQR[[i]]$type <- i
   }
 
-  gdat <- do.call(rbind, lapply(summary_obj, function(data) data[c('Variable', 'Miss_R', 'type')]))
+  gdat <- do.call(rbind, lapply(DQR, function(data) data[c('Variable', 'Miss_R', 'type')]))
   bar_missing <- geom_bar(aes(x=reorder(Variable, -gdat$Miss_R), y=Miss_R, fill=type), stat='identity')
   scale_y <- scale_y_continuous(limits = c(0,1), breaks = c(0, 0.25, 0.5, 0.75, 1),
                                 labels = c('0', '25', '50', '75', '100'))
