@@ -20,8 +20,7 @@
     if (is_compound_pipe(pipes[[1L]])) {
       eval(call("<-", lhs, result[["value"]]), parent,
            parent)
-    }
-    else {
+    } else {
       if (result[["visible"]])
         result[["value"]]
       else invisible(result[["value"]])
