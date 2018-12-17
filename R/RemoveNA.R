@@ -47,6 +47,5 @@ RemoveNA.data.table <- function(data, axis = 1, ratio = 0.5) {
   }
   return(data)
 }
-data <- data.table(airquality)
 
 
