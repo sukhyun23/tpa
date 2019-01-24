@@ -1,16 +1,28 @@
-# binary decision tree
-ggrpart_plot <- function(rpart_model) {
-  # extract the terminal node information from rpart object
-  ndata <- rpart_model$splits[1,1]
-  rp_path <- path.rpart(rpart_model, node = as.numeric(rownames(rpart_model$frame[rpart_model$frame$var == '<leaf>',])))
-  terminal_leaf_ni <- rpart_model$frame[rpart_model$frame$var == '<leaf>',]$n
-  terminal_leaf_label <- rpart_model$frame[rpart_model$frame$var == '<leaf>',]$yval2[,1]-1
-  terminal_leaf_label_ratio <- rpart_model$frame[rpart_model$frame$var == '<leaf>',]$yval2[,5]
-  terminal_leaf_ratio <- rpart_model$frame[rpart_model$frame$var == '<leaf>',]$yval2[,6]
+ggRpartPlot <- function(rp) {
+  ndata <- rp$splits[1,1]
+  nclass <- length(unique(rp$y))
 
-  # create dendro data for ggplot
-  glist <- ggdendro::dendro_data(rpart_model)
-  a <- 0.5; b <- 1
+  # information of terminaal leaves
+  terminal_leaf <- rp$frame[rp$frame$var == '<leaf>', ]
+  # number
+  terminal_leaf_ni <- terminal_leaf$n
+  # class
+  terminal_leaf_label <- terminal_leaf$yval
+  # ratio
+  terminal_leaf_info <- terminal_leaf$yval2
+  terminal_leaf_tratio <- terminal_leaf_info[, ncol(terminal_leaf_info)]
+
+  # etc
+  terminal_leaf_info <- terminal_leaf_info[,c(-1,-ncol(terminal_leaf_info))]
+  terminal_leaf_info_count <- terminal_leaf_info[, 1:(ncol(terminal_leaf_info)/2)]
+  terminal_leaf_info_count <- apply(terminal_leaf_info_count, 1, function(x) paste(x, collapse = ' / '))
+  terminal_leaf_info_ratio <- terminal_leaf_info[, -(1:(ncol(terminal_leaf_info)/2))]
+  terminal_leaf_info_ratio <- apply(terminal_leaf_info_ratio, 2, function(x) round(x,2))
+  terminal_leaf_info_ratio <- apply(terminal_leaf_info_ratio, 1, function(x) paste(x, collapse = ' / '))
+
+  # create dendro data for gg
+  glist <- ggdendro::dendro_data(rp)
+  a <- 0.1; b <- 0.55
   mx <- max(glist$segment$y)
   mi <- min(glist$segment$y)
   glist$segments$y <- glist$segment$y * (b-a)/(mx-mi) - (b-a)*mi/(mx-mi) + a
@@ -18,42 +30,51 @@ ggrpart_plot <- function(rpart_model) {
   glist$labels$y <- glist$label$y * (b-a)/(mx-mi) - (b-a)*mi/(mx-mi) + a
   glist$leaf_labels$y <- glist$leaf_labels$y * (b-a)/(mx-mi) - (b-a)*mi/(mx-mi) + a
   terminal_info <- glist$leaf_labels
+  terminal_leaf_info <- glist$leaf_labels
 
   # add terminal node label
-  terminal_info$ni <- paste(terminal_leaf_ni, ndata, sep='/')
-  terminal_info$fill <- as.numeric(terminal_leaf_label_ratio)
-  terminal_info$ratio <- paste(round(terminal_leaf_label_ratio, 2)*100, '%')
-  terminal_info$t_ratio <- paste(round(terminal_leaf_ratio, 2)*100, '%')
-  terminal_info$n_leaf <- paste(terminal_info$ni, '(', terminal_info$t_ratio, ')', sep = '')
-  terminal_info$ratio <- paste(terminal_info$label, terminal_info$ratio, sep='\n')
-  terminal_info$text_color <- ifelse(terminal_info$fill >= 0.8|terminal_info$fill <=0.2, '1', '0')
+  terminal_leaf_info$ni <- paste(terminal_leaf_ni, ndata, sep = ' / ')
+  terminal_leaf_info$ni <- paste(terminal_leaf_info$ni, ' (', round(terminal_leaf_tratio, 2)*100, '%)', sep = '')
+  terminal_leaf_info$count <- terminal_leaf_info_count
+  terminal_leaf_info$ratio <- terminal_leaf_info_ratio
+  terminal_leaf_info$text <- paste(terminal_leaf_info$label, terminal_leaf_info$ni, terminal_leaf_info$count, terminal_leaf_info$ratio, sep ='\n')
+  terminal_leaf_info$alpha <- terminal_leaf_info$ratio %>% str_split('/') %>% sapply(function(x) as.numeric(x) %>% max)
 
-  # add terminal node bar plot
-  abNorm <- function(x,a,b) (b-a)*(x-min(x))/(max(x)-min(x))+a
-  gdat <- terminal_info[,c('x', 'label', 'fill')]
-  gdat$y <- gdat$fill
-  gdat$y_mid <- abNorm(c(0,1,gdat$y), 0.4, 0.45)[c(-1, -2)]
-  gdat$y1 <- 0.4
-  gdat$y2 <- 0.45
+  # annotation (path)
+  emt <- paste(rep(' ', nchar(glist$labels[1, ]$label %>% as.character)*1.5),
+               collapse = '')
+  yesno <- paste('yes', emt, 'no', collapse = '')
 
-  # plot
-  ggplot(glist$segments) +
-    geom_segment(aes(x=x, y=y, xend=xend, yend=yend), color='gray45') +
-    geom_text(aes(x=x, y=y+0.015, label=label), fontface='bold', size=3.5, data=glist$labels) +
-    geom_text(aes(x=x, y=y-0.005, label=n_leaf), data=terminal_info) +
-    geom_label(aes(x=x, y=y-0.03, label=ratio, fill=fill, color=text_color), fontface='bold', size=4, data=terminal_info) +
-    scale_y_continuous(limits=c(0.4, 1.015)) +
-    scale_color_manual(values=c('black', 'white')) +
-    guides(color = F, fill = guide_colorbar(barwidth = 0.5, barheight = 8, ticks = F)) +
-    scale_fill_gradient2(low = 'firebrick1', high = 'dodgerblue4', mid = 'white',
-                         midpoint = 0.5, limits = c(0,1), name = 'y value\n',
-                         labels = c('0%', '25%', '50%', '75%', '100%')) +
-    geom_segment(aes(x=x, xend=x, y=y1, yend=y_mid), color='dodgerblue4', size=15, data=gdat) +
-    geom_segment(aes(x=x, xend=x, y=y_mid, yend=y2), color='firebrick1', size=15, data=gdat) +
-    theme(
-      axis.ticks = element_blank(),
-      axis.title = element_blank(),
-      axis.text = element_blank(),
-      panel.background = element_blank()
+  # bar plot data
+  a <- 0; b <- 0.04
+  bar_dat <- terminal_leaf_info[, c('x', 'label', 'ratio')]
+  bar_dat$ratio <- lapply(str_split(bar_dat$ratio, '/'), as.numeric)
+  mx <- max(unlist(bar_dat$ratio)); mi <- min(unlist(bar_dat$ratio))
+  bar_dat$ratio <- bar_dat$ratio %>% lapply(function(x) x*(b-a)/(mx-mi) - (b-a)*mi/(mx-mi) + a)
+  bar_dat <- data.frame(bar_dat$ratio)
+  names(bar_dat) <- paste('x', 1:ncol(bar_dat), sep = '')
+  bar_dat$label <- unique(terminal_leaf_info$label)
+  bar_dat <- reshape2::melt(bar_dat, 'label', variable.name = 'x')
+  bar_dat$x <- as.numeric(bar_dat$x)
+
+  ggplot2::ggplot(glist$segments) +
+    ggplot2::geom_segment(ggplot2::aes(x = x, y = y, xend = xend, yend = yend),
+                          color='gray45') +
+    ggplot2::geom_text(ggplot2::aes(x=x, y=y+0.01, label = label),
+                       fontface = 'bold', size=3.5, data = glist$labels) +
+    ggplot2::annotate(geom='text', x=glist$labels[1,]$x,
+                      y=glist$labels[1,]$y - 0.0075, label = yesno) +
+    ggplot2::geom_label(ggplot2::aes(x=x, y=y-0.02, label = text,
+                                     fill=label, alpha = alpha),
+                        fontface = 'bold', size=4, data = terminal_leaf_info) +
+    ggplot2::guides(alpha=F) +
+    ggplot2::geom_bar(ggplot2::aes(x = x, y = value, fill = label),
+                      stat='identity', data = bar_dat,
+                      position ='dodge', width = 0.5) +
+    ggplot2::theme(
+      axis.ticks = ggplot2::element_blank(),
+      axis.title = ggplot2::element_blank(),
+      axis.text = ggplot2::element_blank(),
+      panel.background = ggplot2::element_blank()
     )
 }
