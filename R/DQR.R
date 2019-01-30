@@ -2,8 +2,7 @@
 
 # create s3 class
 DQR <- function(x) UseMethod('DQR')
-data <- airquality
-tpa::DQR(data)
+
 
 # default function
 DQR.default <- function(data){
