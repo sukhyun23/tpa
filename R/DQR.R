@@ -2,7 +2,8 @@
 
 # create s3 class
 DQR <- function(x) UseMethod('DQR')
-
+data <- airquality
+tpa::DQR(data)
 
 # default function
 DQR.default <- function(data){
@@ -83,8 +84,8 @@ DQR.default <- function(data){
     char_result$SMode_C <- as.numeric(char_result$SMode_C)
     char_result$FMode_R <- char_result$FMode_C/char_result$n
     char_result$SMode_R <- char_result$SMode_C/char_result$n
+    char_result <- data.frame(char_result[c(1:7, 10, 8, 9, 11)])
   }
-  char_result <- data.frame(char_result[c(1:7, 10, 8, 9, 11)])
 
   result <- list(numerical = num_result, categorical = char_result, date = date_result)
   result <- structure(result, class = 'DQR')
@@ -171,8 +172,8 @@ DQR.data.table <- function(data) {
     char_result$SMode_C <- as.numeric(char_result$SMode_C)
     char_result$FMode_R <- char_result$FMode_C/char_result$n
     char_result$SMode_R <- char_result$SMode_C/char_result$n
+    char_result <- data.frame(char_result[c(1:7, 10, 8, 9, 11)])
   }
-  char_result <- data.frame(char_result[c(1:7, 10, 8, 9, 11)])
 
   result <- list(numerical = num_result, categorical = char_result, date = date_result)
   result <- structure(result, class = 'DQR')
