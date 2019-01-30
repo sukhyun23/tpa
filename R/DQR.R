@@ -204,3 +204,5 @@ plot.DQR <- function(DQR) {
     xylab +
     theme1
 }
+
+
