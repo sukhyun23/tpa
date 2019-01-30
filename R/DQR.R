@@ -11,13 +11,21 @@ DQR.default <- function(data){
   NofNA <- function(x) sum(is.na(x))
   Q1 <- function(x, na.rm=T) quantile(x, 0.25, na.rm = na.rm)
   Q3 <- function(x, na.rm=T) quantile(x, 0.75, na.rm = na.rm)
-  BasicInfo <- function(x){
+  BasicInfo <- function(x, summary = F){
     funs <- c(length, NofNA, Card)
     result <- sapply(funs, function(f) f(x))
     result[4] <- result[2]/result[1]
     result[5] <- result[3]/result[1]
-    names(result) <- c('n', 'Miss', 'Card', 'Miss_R', 'Card_R')
-    return(result)
+
+    if (summary == T) {
+      result <- c(result, as.numeric(summary(x))[1:6])
+      names(result) <- c('n', 'Miss', 'Card', 'Miss_R', 'Card_R',
+                         'Min', 'Q1', 'Median', 'Mean', 'Q3', 'Max')
+      return(result)
+    } else {
+      names(result) <- c('n', 'Miss', 'Card', 'Miss_R', 'Card_R')
+      return(result)
+    }
   }
 
   # error
@@ -29,42 +37,37 @@ DQR.default <- function(data){
          function, for, in, next, break, TRUE, FALSE, NULL, Inf, NaN, NA")
   }
 
-  # idx
-  date_idx <- sapply(data, is.date)
-  num_idx <- sapply(data, is.numerical)
-  char_idx <- sapply(data, is.categorical)
-
   # data
-  date_dat <- data[date_idx]
-  num_dat <- data[num_idx]
-  char_dat <- data[char_idx]
+  date_dat <- Filter(f = is.date, x = data)
+  num_dat <- Filter(f = is.numerical, x = data)
+  char_dat <- Filter(f = is.categorical, x = data)
 
   # calculating
   # date
-  if(ncol(date_dat)==0){
+  if (ncol(date_dat) == 0) {
     date_result <- NA
   } else {
-    for(i in names(date_dat[sapply(date_dat, lubridate::is.Date)])){
+    for(i in names(date_dat)){
       date_dat[[i]] <- as.POSIXct(date_dat[[i]])
     }
+    tmp_list <- lapply(date_dat, summary)
     date_result <- cbind(
       data.frame(t(sapply(date_dat, BasicInfo))),
-      data.frame(t(sapply(date_dat, summary)))
+      t(data.frame(as.character(tmp_list$date)))
     )
-    names(date_result)[6:11] <- c('Min.', 'Q1', 'Median', 'Mean', 'Q3', 'Max.')
-    for(i in 6:11) date_result[[i]] <- as.POSIXct(date_result[[i]], origin='1970-01-01')
+    names(date_result)[6:11] <- c('Min', 'Q1', 'Median', 'Mean', 'Q3', 'Max')
+    # for(i in 6:11) date_result[[i]] <- as.POSIXct(date_result[[i]], origin='1970-01-01')
   }
 
   # numerical
-  if(ncol(num_dat)==0){
+  if (ncol(num_dat) == 0) {
     num_result <- NA
   } else {
-    num_result <- data.frame(cbind(t(sapply(num_dat, BasicInfo)), t(sapply(num_dat, summary))))
-    names(num_result)[6:11] <- c('Min.', 'Q1', 'Median', 'Mean', 'Q3', 'Max.')
+    num_result <- data.frame(t(sapply(num_dat, BasicInfo, summary = T)))
   }
 
   # categorical
-  if(ncol(char_dat)==0){
+  if (ncol(char_dat) == 0) {
     char_result <- NA
   } else {
     mode_dat <- cbind(
@@ -81,7 +84,7 @@ DQR.default <- function(data){
     char_result$FMode_R <- char_result$FMode_C/char_result$n
     char_result$SMode_R <- char_result$SMode_C/char_result$n
   }
-  char_result <- char_result[c(1:7, 10, 8, 9, 11)]
+  char_result <- data.frame(char_result[c(1:7, 10, 8, 9, 11)])
 
   result <- list(numerical = num_result, categorical = char_result, date = date_result)
   result <- structure(result, class = 'DQR')
@@ -92,64 +95,67 @@ DQR.default <- function(data){
 # data.table class
 DQR.data.table <- function(data) {
   # functions
-  Card <- function(x) length(table(x))
+  Card <- function(x) length(na.omit(unique(x)))
   NofNA <- function(x) sum(is.na(x))
   Q1 <- function(x, na.rm=T) quantile(x, 0.25, na.rm = na.rm)
   Q3 <- function(x, na.rm=T) quantile(x, 0.75, na.rm = na.rm)
-  BasicInfo <- function(x){
+  BasicInfo <- function(x, summary = F){
     funs <- c(length, NofNA, Card)
     result <- sapply(funs, function(f) f(x))
     result[4] <- result[2]/result[1]
     result[5] <- result[3]/result[1]
-    names(result) <- c('n', 'Miss', 'Card', 'Miss_R', 'Card_R')
-    return(result)
+
+    if (summary == T) {
+      result <- c(result, as.numeric(summary(x))[1:6])
+      names(result) <- c('n', 'Miss', 'Card', 'Miss_R', 'Card_R',
+                         'Min', 'Q1', 'Median', 'Mean', 'Q3', 'Max')
+      return(result)
+    } else {
+      names(result) <- c('n', 'Miss', 'Card', 'Miss_R', 'Card_R')
+      return(result)
+    }
   }
 
   # error
   reserved_words <- c("if", "else", "while", "function", "for",
                       "in", "next", "break", " TRUE", "FALSE", "NULL", "Inf",
                       "NaN", "NA")
-  if (sum(names(data) %in% reserved_words) != 0){
+  if (sum(names(data) %in% reserved_words) != 0) {
     stop("변수명은 예약어로 사용할 수 없습니다.\n 예약어 : if, else, while,\n
          function, for, in, next, break, TRUE, FALSE, NULL, Inf, NaN, NA")
   }
 
-  # idx
-  date_idx <- sapply(data, is.date)
-  num_idx <- sapply(data, is.numerical)
-  char_idx <- sapply(data, is.categorical)
-
   # data
-  date_dat <- data[, date_idx, with=F]
-  num_dat <- data[, num_idx, with=F]
-  char_dat <- data[, char_idx, with=F]
+  date_dat <- Filter(f = is.date, x = data)
+  num_dat <- Filter(f = is.numerical, x = data)
+  char_dat <- Filter(f = is.categorical, x = data)
 
   # calculating
   # date
-  if(ncol(date_dat)==0){
+  if (ncol(date_dat) == 0) {
     date_result <- NA
   } else {
-    for(i in names(date_dat[sapply(date_dat, lubridate::is.Date)])){
+    for(i in names(date_dat)){
       date_dat[[i]] <- as.POSIXct(date_dat[[i]])
     }
+    tmp_list <- lapply(date_dat, summary)
     date_result <- cbind(
       data.frame(t(sapply(date_dat, BasicInfo))),
-      data.frame(t(sapply(date_dat, summary)))
+      t(data.frame(as.character(tmp_list$date)))
     )
-    names(date_result)[6:11] <- c('Min.', 'Q1', 'Median', 'Mean', 'Q3', 'Max.')
-    for(i in 6:11) date_result[[i]] <- as.POSIXct(date_result[[i]], origin='1970-01-01')
+    names(date_result)[6:11] <- c('Min', 'Q1', 'Median', 'Mean', 'Q3', 'Max')
+    # for(i in 6:11) date_result[[i]] <- as.POSIXct(date_result[[i]], origin='1970-01-01')
   }
 
   # numerical
-  if(ncol(num_dat)==0){
+  if (ncol(num_dat) == 0) {
     num_result <- NA
   } else {
-    num_result <- data.frame(cbind(t(sapply(num_dat, BasicInfo)), t(sapply(num_dat, summary))))
-    names(num_result)[6:11] <- c('Min.', 'Q1', 'Median', 'Mean', 'Q3', 'Max.')
+    num_result <- data.frame(t(sapply(num_dat, BasicInfo, summary = T)))
   }
 
   # categorical
-  if(ncol(char_dat)==0){
+  if (ncol(char_dat) == 0) {
     char_result <- NA
   } else {
     mode_dat <- cbind(
