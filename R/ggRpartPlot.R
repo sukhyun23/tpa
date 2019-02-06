@@ -67,7 +67,7 @@ ggRpartPlot <- function(rp, y) {
 
 
   # annotation (path)
-  emt <- paste(rep(' ', nchar(glist$labels[1, ]$label %>% as.character)*1.5),
+  emt <- paste(rep(' ', nchar(as.character(glist$labels[1, ]$label))*1.5),
                collapse = '')
   yesno <- paste('yes', emt, 'no', collapse = '')
 
