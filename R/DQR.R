@@ -1,5 +1,5 @@
 # Data Quality Report
-# dd
+# d
 # create s3 class
 DQR <- function(x) UseMethod('DQR')
 
