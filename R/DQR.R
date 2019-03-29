@@ -1,5 +1,6 @@
 # Data Quality Report
-# test commit
+# test
+
 # create s3 class
 DQR <- function(x) UseMethod('DQR')
 
