@@ -56,10 +56,6 @@ Summary2.factor <- function(x) {
   names(result) <- c('F.mode.value', 'F.mode.count', 'S.mode.value', 'S.mode.count')
   return(result)
 }
-
-as.data.frame.Summary2 <- function(x) {
-  as.data.frame(x)  
-}
 Summary2.data.frame <- function(data) {
   # to apply 2 functions(BasicInfo, Summary2), create DQR class
   DQR <- function(data) {
