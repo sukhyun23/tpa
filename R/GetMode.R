@@ -1,16 +1,22 @@
-GetMode <- function(x, order = 1, type = "value"){
+GetMode <- function(x, mode_order = ..., type = c("value", "count")) {
+  # arguments setting
+  len_x <- length(x)
+  mode_order <- match(mode_order, 1:len_x)
+  type <- match.arg(type, choices = c("value", "count"), several.ok = F)
+  
+  # calculation table
   count_tab <- sort(table(x), decreasing = T)
-  mode_count <- count_tab[order]
-  value_tab <- names(count_tab)
-  if (is.null(value_tab))
-    value_tab <- NA
-  mode_value <- value_tab[order]
-  if (type == "value") {
-    result <- mode_value
+  mode_count <- count_tab
+  mode_value <- names(count_tab)
+  
+  # exception error
+  if (is.null(mode_count) || is.null(mode_value)) {
+    return(NA)
   }
-  else if (type == "count") {
-    result <- mode_count
+  
+  if (type == 'value') {
+    return(mode_value[mode_order])
+  } else if (type == 'count') {
+    return(unname(mode_count[mode_order]))
   }
-  names(result) <- NULL
-  return(result)
 }
