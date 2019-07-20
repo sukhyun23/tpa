@@ -3,9 +3,9 @@ na_ratio <- function(data, axis = 1) {
   n <- nrow(data)
   p <- ncol(data)
   
-  if (axis = 1) {
+  if (axis == 1) {
     result <- rowSums(na_dat)/p
-  } else if (axis = 2) {
+  } else if (axis == 2) {
     result <- colSums(na_dat)/n
   }
   return(result)
@@ -24,9 +24,9 @@ remove_na.data.frame <- function(data, axis = 1, ratio = 0.5) {
     return(data)
   } 
   
-  if (axis = 1) {
+  if (axis == 1) {
     data <- data[-NA_idx, ]
-  } else if (axis = 2) {
+  } else if (axis == 2) {
     data <- data[, -NA_idx]
   }
   
@@ -44,9 +44,9 @@ remove_na.data.table <- function(data, axis = 1, ratio = 0.5) {
     return(data)
   } 
   
-  if (axis = 1) {
+  if (axis == 1) {
     data <- data[-NA_idx, ]
-  } else if (axis = 2) {
+  } else if (axis == 2) {
     data <- data[, -NA_idx, with = F]
   }
   
