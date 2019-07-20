@@ -79,6 +79,6 @@ summary2.data.frame <- function(data) {
   
   return(result)
 }
-summary2(diamonds)
+
 
 
