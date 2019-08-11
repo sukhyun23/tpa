@@ -149,9 +149,3 @@ ggcorr_plot <- function(
     )
   return(g1)
 }
-
-
-mat <- cor(Filter(is.numeric, iris))
-ggcorr_plot()
-
-
