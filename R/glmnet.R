@@ -10,7 +10,7 @@ cv_glmnet_coef <- function(object, s = 'lambda.min', intercept = F, nonzero = F)
   }
   
   if (nonzero) {
-    co <- co[co > 0]
+    co <- co[co != 0]
   }
   
   return(co)

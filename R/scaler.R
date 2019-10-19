@@ -1,348 +1,120 @@
 # min max normalization ---------------------------------------------------
-min_max_norm <- function(
+# rm(list = ls())
+minmax_norm <- function(
   x, a = 0, b = 1, 
   mx = max(x, na.rm = T), 
   mi = min(x, na.rm = T)
 ) {
   x * (b-a) / (mx-mi) - (b-a)*mi/(mx-mi) + a  
 }
-min_max_norm_reverse <- function(x, a = 0, b = 1, mx, mi) {
+minmax_norm_reverse <- function(x, a = 0, b = 1, mx, mi) {
   (x + (b-a)*mi/(mx-mi) - a) * (mx-mi)/(b-a)
 }
-
+normal_norm <- function(x, m, s) (x-m)/s
+normal_norm_reverse <- function(x, m, s) (x*s)+m
+split_col <- function(data) {
+  dat_quan <- Filter(tpa::is.quan, data)
+  dat_qual <- Filter(function(x) !tpa::is.quan(x), data)
+  var_order <- names(data)
+  
+  result <- list(
+    quan = dat_quan, 
+    qual = dat_qual, 
+    order = var_order
+  )
+  
+  return(result)
+}
 
 # scaler ------------------------------------------------------------------
-scaler <- function(train, test, type, ...) {
+scaler <- function(data, type, ...) {
   UseMethod('scaler')  
 }
 
 scaler.data.frame <- function(
-  train, test, 
+  data, 
   type = c('normal', 'minmax')
 ) {
   # arguments
   type <- match.arg(type)
   
   # split
-  tr_quan <- Filter(tpa::is.quan, train)
-  te_quan <- Filter(tpa::is.quan, test)
+  split_result <- split_col(data)
   
-  tmpfun <- function(x) !tpa::is.quan(x)
-  tr_qual <- Filter(tmpfun, train)
-  te_qual <- Filter(tmpfun, test)
-  
-  names_order <- names(train)
-  
-  # train
+  # statistics
   if (type == 'normal') {
-    tr_result <- data.frame(scale(tr_quan))
-    stats <- list(
-      mean = colMeans(tr_quan),
-      sd = vapply(tr_quan, sd, 1)    
-    )
+    m <- colMeans(split_result$quan)
+    s <- vapply(split_result$quan, sd, na.rm = T, c(1))
+    stat_list <- list(mean = m, sd = s)
   } else if (type == 'minmax') {
-    tr_result <- data.frame(sapply(tr_quan, min_max_norm))
-    stats <- list(
-      min = vapply(tr_quan, min, 1),
-      max = vapply(tr_quan, max, 1)
-    )
+    mx <- vapply(split_result$quan, max, na.rm = T, c(1))
+    mi <- vapply(split_result$quan, min, na.rm = T, c(1))
+    stat_list <- list(min = mi, max = mx)
   }
-  tr_result <- cbind(tr_result, tr_qual)
-  tr_result <- tr_result[, names_order]
   
-  # test
-  if (type == 'normal') {
-    te_result <- data.frame(
-      Map(
-        function(x, m, s) (x-m)/s,
-        x = te_quan, 
-        m = stats$mean, 
-        s = stats$sd
-      )
-    )
-  } else if (type == 'minmax') {
-    te_result <- data.frame(
-      Map(
-        function(x, mx, mi) min_max_norm(x, mx = mx, mi = mi),
-        x = te_quan, 
-        mx = stats$max, 
-        mi = stats$min
-      )
-    )
-  }
-  te_result <- cbind(te_result, te_qual)
-  te_result <- te_result[, names_order]
-  
-  result <- list(train = tr_result, test = te_result)
+  # result
+  result <- structure(
+    c(
+      stat_list, 
+      order = list(split_result$order),
+      type = list(type)
+    ),
+    class = 'scaler'
+  )
   return(result)
 }
 
-scaler.data.table <- function(
-  train, test,
-  type = c('normal', 'minmax')
-) {
-  # arguments
-  type <- match.arg(type)
+predict.scaler <- function(object, data, reverse = F) {
+  data_list <- split_col(data)
   
-  # split
-  tr_quan <- Filter(tpa::is.quan, train)
-  te_quan <- Filter(tpa::is.quan, test)
-  
-  tmpfun <- function(x) !tpa::is.quan(x)
-  tr_qual <- Filter(tmpfun, train)
-  te_qual <- Filter(tmpfun, test)
-  
-  names_order <- names(train)
-  
-  # train
-  if (type == 'normal') {
-    tr_result <- data.table(scale(tr_quan))
-    stats <- list(
-      mean = colMeans(tr_quan),
-      sd = vapply(tr_quan, sd, 1)    
-    )
-  } else if (type == 'minmax') {
-    tr_result <- data.table(sapply(tr_quan, min_max_norm))
-    stats <- list(
-      min = vapply(tr_quan, min, 1),
-      max = vapply(tr_quan, max, 1)
-    )
-  }
-  tr_result <- cbind(tr_result, tr_qual)
-  tr_result <- tr_result[, names_order, with = F]
-  
-  # test
-  if (type == 'normal') {
-    te_result <- as.data.table(
-      Map(
-        function(x, m, s) (x-m)/s,
-        x = te_quan, 
-        m = stats$mean, 
-        s = stats$sd
-      )
-    )
-  } else if (type == 'minmax') {
-    te_result <- as.data.table(
-      Map(
-        function(x, mx, mi) min_max_norm(x, mx = mx, mi = mi),
-        x = te_quan, 
-        mx = stats$max, 
-        mi = stats$min
-      )
-    )
-  }
-  te_result <- cbind(te_result, te_qual)
-  te_result <- te_result[, names_order, with = F]
-  
-  result <- list(train = tr_result, test = te_result)
-  return(result)
-}
-
-scaler.matrix <- function(
-  train, test,
-  type = c('normal', 'minmax')
-) {
-  # arguments
-  type <- match.arg(type)
-  
-  # train
-  if (type == 'normal') {
-    tr_result <- scale(train)
-    stats <- list(
-      mean = attr(tr_result, 'scaled:center'),
-      sd = attr(tr_result, 'scaled:scale')
-    )
-  } else if (type == 'minmax') {
-    tr_result <- apply(train, 2, min_max_norm)
-    stats <- list(
-      min = apply(train, 2, min),
-      max = apply(train, 2, max)
-    )
-  }
-  
-  # test
-  if (type == 'normal') {
-    te_result <- as.data.frame(
-      Map(
-        function(x, m, s) (x-m)/s,
-        x = as.list(data.frame(test)),
-        m = stats$mean, 
-        s = stats$sd
-      )
-    )
-  } else if (type == 'minmax') {
-    te_result <- as.data.frame(
-      Map(
-        function(x, mx, mi) min_max_norm(x, mx = mx, mi = mi),
-        x = as.list(data.frame(test)),
-        mx = stats$max, 
-        mi = stats$min
-      )
-    )
-  }
-  te_result <- as.matrix(te_result)
-
-  result <- list(train = tr_result, test = te_result)
-  return(result)
-}
-
-
-# unscaler ----------------------------------------------------------------
-unscaler <- function(train, test, type, stats, ...) {
-  UseMethod('unscaler')
-}
-
-unscaler.data.frame <- function(
-  train, test, 
-  type = c('normal', 'minmax'),
-  stats
-) {
-  # arguments
-  type <- match.arg(type)
-  
-  # split
-  tr_quan <- Filter(tpa::is.quan, train)
-  te_quan <- Filter(tpa::is.quan, test)
-  
-  tmpfun <- function(x) !tpa::is.quan(x)
-  tr_qual <- Filter(tmpfun, train)
-  te_qual <- Filter(tmpfun, test)
-  
-  names_order <- names(train)
-  
-  # train
-  if (type == 'normal') {
-    tr_result <- data.frame(
-      Map(
-        function(x, m, s) x*s + m,
-        x = tr_quan,
-        m = stats$mean,
-        s = stats$sd
+  if (!reverse) {
+    if (object$type == 'normal') {
+      result <- Map(
+        normal_norm, 
+        data_list$quan, 
+        m = object$mean, 
+        s = object$sd
       )  
-    )
-  } else if (type == 'minmax') {
-    tr_result <- data.frame(
-      Map(
-        min_max_norm_reverse, 
-        x = tr_quan, 
-        mx = stats$max, 
-        mi = stats$min    
-      )
-    )
-  }
-  tr_result <- cbind(tr_result, tr_qual)
-  tr_result <- tr_result[, names_order]
-  
-  # test
-  if (type == 'normal') {
-    te_result <- data.frame(
-      Map(
-        function(x, m, s) x*s + m,
-        x = te_quan,
-        m = stats$mean,
-        s = stats$sd
+    } else if (object$type == 'minmax') {
+      result <- Map(
+        minmax_norm, 
+        data_list$quan, 
+        mx = object$max, 
+        mi = object$min
       )  
-    )
-  } else if (type == 'minmax') {
-    te_result <- data.frame(
-      Map(
-        min_max_norm_reverse, 
-        x = te_quan, 
-        mx = stats$max, 
-        mi = stats$min    
-      )
-    )
+    }
+  } else if (reverse) {
+    if (object$type == 'normal') {
+      result <- Map(
+        normal_norm_reverse, 
+        data_list$quan, 
+        m = object$mean, 
+        s = object$sd
+      )  
+    } else if (object$type == 'minmax') {
+      result <- Map(
+        minmax_norm_reverse, 
+        data_list$quan, 
+        mx = object$max, 
+        mi = object$min
+      )  
+    }
   }
-  te_result <- cbind(te_result, te_qual)
-  te_result <- te_result[, names_order]
+  dat_quan <- as.data.frame(result)
   
-  result <- list(train = tr_result, test = te_result)
-  return(result)
+  data[, names(data_list$quan)] <- dat_quan
+  return(data)
 }
 
-unscaler.data.table <- function(
-  train, test, 
-  type = c('normal', 'minmax'),
-  stats
-) {
-  # arguments
-  type <- match.arg(type)
-  
-  # split
-  tr_quan <- Filter(tpa::is.quan, train)
-  te_quan <- Filter(tpa::is.quan, test)
-  
-  tmpfun <- function(x) !tpa::is.quan(x)
-  tr_qual <- Filter(tmpfun, train)
-  te_qual <- Filter(tmpfun, test)
-  
-  names_order <- names(train)
-  
-  # train
-  if (type == 'normal') {
-    tr_result <- as.data.table(
-      Map(
-        function(x, m, s) x*s + m,
-        x = tr_quan,
-        m = stats$mean,
-        s = stats$sd
-      )  
-    )
-  } else if (type == 'minmax') {
-    tr_result <- as.data.table(
-      Map(
-        min_max_norm_reverse, 
-        x = tr_quan, 
-        mx = stats$max, 
-        mi = stats$min    
-      )
-    )
-  }
-  tr_result <- cbind(tr_result, tr_qual)
-  tr_result <- tr_result[, names_order, with = F]
-  
-  # test
-  if (type == 'normal') {
-    te_result <- as.data.table(
-      Map(
-        function(x, m, s) x*s + m,
-        x = te_quan,
-        m = stats$mean,
-        s = stats$sd
-      )  
-    )
-  } else if (type == 'minmax') {
-    te_result <- as.data.table(
-      Map(
-        min_max_norm_reverse, 
-        x = te_quan, 
-        mx = stats$max, 
-        mi = stats$min    
-      )
-    )
-  }
-  te_result <- cbind(te_result, te_qual)
-  te_result <- te_result[, names_order, with = F]
-  
-  result <- list(train = tr_result, test = te_result)
-  return(result)
-}
-
-# set.seed(1)
-# idx <- sample(100, 100)
-# train_raw <- iris[idx, ] %>% data.table()
-# test_raw <- iris[-idx, ] %>% data.table()
-# a <- scaler(train_raw, test_raw, type = 'minmax')
-# train <- a$train
-# test <- a$test
+# data <- iris
+# data <- iris %>% data.table()
 # 
-# type <- 'minmax'
-# stats <- list(
-#   max = sapply(train_raw[, 1:4], max),
-#   min = sapply(train_raw[, 1:4], min)
-# )
+# object <- scaler(data)
+# object <- scaler(data, type = 'minmax')
 # 
-# train_raw
-# a <- unscaler(train, test, 'minmax', stats)
-# train_raw$Sepal.Length == a$train$Sepal.Length
-# test_raw$Sepal.Length == a$test$Sepal.Length
+# d1 <- predict(object, data)
+# d2 <- predict(object, d1, reverse = T)
+# 
+# iris$Sepal.Length == d2$Sepal.Length
+# iris == d2
+# d1 %>% summary()
