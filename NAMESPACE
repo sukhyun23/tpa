@@ -1,7 +1,6 @@
 useDynLib("tpa")
 
 import(dplyr)
-import(data.table)
 import(ggplot2)
 
 export(summary2, remove_na, scaler)
