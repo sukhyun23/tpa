@@ -12,18 +12,18 @@ summary2.default <- function(x) {
   names(result) <- c('min', 'q1', 'median', 'mean', 'q3', 'max', 'sd')
   return(result)
 }
-summary2.double <- function(x) {  
-  f <- list(min, q1, median, mean, q3, max, sd)
-  result <- vapply(X = f, FUN = function(f) f(x, na.rm = T), FUN.VALUE = c(1))
-  names(result) <- c('min', 'q1', 'median', 'mean', 'q3', 'max', 'sd')
-  return(result)
-}
-summary2.integer <- function(x) {  
-  f <- list(min, q1, median, mean, q3, max, sd)
-  result <- vapply(X = f, FUN = function(f) f(x, na.rm = T), FUN.VALUE = c(1))
-  names(result) <- c('min', 'q1', 'median', 'mean', 'q3', 'max', 'sd')
-  return(result)
-}
+# summary2.double <- function(x) {  
+#   f <- list(min, q1, median, mean, q3, max, sd)
+#   result <- vapply(X = f, FUN = function(f) f(x, na.rm = T), FUN.VALUE = c(1))
+#   names(result) <- c('min', 'q1', 'median', 'mean', 'q3', 'max', 'sd')
+#   return(result)
+# }
+# summary2.integer <- function(x) {  
+#   f <- list(min, q1, median, mean, q3, max, sd)
+#   result <- vapply(X = f, FUN = function(f) f(x, na.rm = T), FUN.VALUE = c(1))
+#   names(result) <- c('min', 'q1', 'median', 'mean', 'q3', 'max', 'sd')
+#   return(result)
+# }
 summary2.numeric <- function(x) {  
   f <- list(min, q1, median, mean, q3, max, sd)
   result <- vapply(X = f, FUN = function(f) f(x, na.rm = T), FUN.VALUE = c(1))
@@ -49,7 +49,7 @@ summary2.POSIXct <- function(x, origin = '1970-01-01 00:00:00') {
 summary2.character <- function(x) {
   or <- c(1, 1, 2, 2)
   ty <- c('value', 'count', 'value', 'count')
-  result <- unlist(Map(f = function(order, type) get_mode(x, order, type), order = or, type = ty))
+  result <- unlist(Map(f = function(order, type) tpa::get_mode(x, order, type), order = or, type = ty))
   names(result) <- c('F.mode.value', 'F.mode.count', 'S.mode.value', 'S.mode.count')
   return(result)
 }
@@ -57,7 +57,7 @@ summary2.factor <- function(x) {
   x <- as.character(x)
   or <- c(1, 1, 2, 2)
   ty <- c('value', 'count', 'value', 'count')
-  result <- unlist(Map(f = function(order, type) get_mode(x, order, type), order = or, type = ty))
+  result <- unlist(Map(f = function(order, type) tpa::get_mode(x, order, type), order = or, type = ty))
   names(result) <- c('F.mode.value', 'F.mode.count', 'S.mode.value', 'S.mode.count')
   return(result)
 }
@@ -80,9 +80,9 @@ summary2.data.frame <- function(data) {
   }
   
   data_list <- list(
-    quantitative = Filter(is.quan, data),
-    qualitative = Filter(is.qual, data),
-    date = Filter(is.date, data)
+    quantitative = Filter(tpa::is.quan, data),
+    qualitative = Filter(tpa::is.qual, data),
+    date = Filter(tpa::is.date, data)
   )
   data_list <- data_list[vapply(data_list, ncol, c(1)) != 0]
   names_list <- lapply(data_list, function(x) names(x))
@@ -97,6 +97,3 @@ summary2.data.frame <- function(data) {
   
   return(result)
 }
-
-
-
