@@ -1,1 +1,19 @@
-exportPattern("^[[:alpha:]]+")
+useDynLib("tpa")
+
+import(dplyr)
+import(data.table)
+import(ggplot2)
+
+export(summary2, remove_na, scaler)
+
+S3method("summary2", "Date")
+S3method("summary2", "POSIXct")
+S3method("summary2", "character")
+S3method("summary2", "factor")
+S3method("summary2", "data.frame")
+
+S3method("remove_na", "data.frame")
+S3method("remove_na", "data.table")
+
+S3method("scaler", "data.frame")
+S3method("predict", "scaler")
