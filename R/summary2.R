@@ -3,7 +3,7 @@ q1 <- function(...) quantile(x = ..., probs = 0.25)
 q3 <- function(...) quantile(x = ..., probs = 0.75)
 
 # create generic function
-summary2 <- function(x) UseMethod('summary2')
+summary2 <- function(x, ...) UseMethod('summary2')
 
 # by class
 summary2.default <- function(x) {  
@@ -61,9 +61,9 @@ summary2.factor <- function(x) {
   names(result) <- c('F.mode.value', 'F.mode.count', 'S.mode.value', 'S.mode.count')
   return(result)
 }
-summary2.data.frame <- function(data) {
-  trans <- function(data) {
-    data.frame(t(data.frame(data)))
+summary2.data.frame <- function(x) {
+  trans <- function(x) {
+    data.frame(t(data.frame(x)))
   }
   basic_info <- function(x) {
     n <- length(x)
@@ -80,9 +80,9 @@ summary2.data.frame <- function(data) {
   }
   
   data_list <- list(
-    quantitative = Filter(tpa::is.quan, data),
-    qualitative = Filter(tpa::is.qual, data),
-    date = Filter(tpa::is.date, data)
+    quantitative = Filter(tpa::is.quan, x),
+    qualitative = Filter(tpa::is.qual, x),
+    date = Filter(tpa::is.date, x)
   )
   data_list <- data_list[vapply(data_list, ncol, c(1)) != 0]
   names_list <- lapply(data_list, function(x) names(x))
