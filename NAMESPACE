@@ -17,6 +17,7 @@ S3method("summary2", "Date")
 S3method("summary2", "POSIXct")
 S3method("summary2", "character")
 S3method("summary2", "factor")
+S3method("summary2", "numeric")
 S3method("summary2", "data.frame")
 
 S3method("remove_na", "data.frame")
