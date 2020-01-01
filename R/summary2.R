@@ -6,6 +6,18 @@ q3 <- function(...) quantile(x = ..., probs = 0.75)
 summary2 <- function(x) UseMethod('summary2')
 
 # by class
+summary2.integer <- function(x) {  
+  f <- list(min, q1, median, mean, q3, max, sd)
+  result <- vapply(X = f, FUN = function(f) f(x, na.rm = T), FUN.VALUE = c(1))
+  names(result) <- c('min', 'q1', 'median', 'mean', 'q3', 'max', 'sd')
+  return(result)
+}
+summary2.numeric <- function(x) {  
+  f <- list(min, q1, median, mean, q3, max, sd)
+  result <- vapply(X = f, FUN = function(f) f(x, na.rm = T), FUN.VALUE = c(1))
+  names(result) <- c('min', 'q1', 'median', 'mean', 'q3', 'max', 'sd')
+  return(result)
+}
 summary2.default <- function(x) {  
   f <- list(min, q1, median, mean, q3, max, sd)
   result <- vapply(X = f, FUN = function(f) f(x, na.rm = T), FUN.VALUE = c(1))

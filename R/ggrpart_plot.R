@@ -8,7 +8,7 @@
 # rp <- fit
 # y <- kyphosis$Kyphosis %>% unique %>% sort
 
-ggRpartPlot <- function(rp, y) {
+ggrpart_plot <- function(rp, y) {
   # tm.text.col
   # br.text.col
   # br.line.col
