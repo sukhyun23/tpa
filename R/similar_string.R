@@ -1,8 +1,4 @@
-FindSimilarString <- function(x, FR = 0.2, ignore.case = T){
-  # if(!require(ggplot2)){
-  #   install.packages("ggplot2")
-  #   library(ggplot2)
-  # }
+similar_string <- function(x, FR = 0.2, ignore.case = T){
   x <- as.character(x)
   if (any(nchar(na.omit(unique(x))) <= 3)) {
     message("Warning message: If a length of string is too low, it may work incorrectly")

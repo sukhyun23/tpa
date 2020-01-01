@@ -1,6 +1,6 @@
-library(data.table)
-library(reshape2)
-library(dplyr)
+# library(data.table)
+# library(reshape2)
+# library(dplyr)
 
 
 profile_ttest <- function(value, group, raw_value) {
@@ -145,17 +145,12 @@ profile_plot <- function(data) {
 
 
 
-tmp_list[[1]]
 
-
-minmax_norm <- function(x, a = 0, b = 1, mx = max(x), mi = min(x)) {
-  x * (b - a)/(mx - mi) - (b - a) * mi/(mx - mi) + a
-}
+# minmax_norm <- function(x, a = 0, b = 1, mx = max(x), mi = min(x)) {
+#   x * (b - a)/(mx - mi) - (b - a) * mi/(mx - mi) + a
+# }
 
 # geom_point(aes(x = value, y = 0))
-
-
-
 profile_level <- function(value, seq, group) {
   # t.test(value ~ group) by sequence
   result <- Map(

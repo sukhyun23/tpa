@@ -1,7 +1,7 @@
 get_mode <- function(x, order = 1, type = c('value', 'count')) {
   type <- match.arg(type)
   
-  tab <- fast_table(x)
+  tab <- table(x)
   tab <- tab[order(-tab)]
   
   if (type == 'value') {
