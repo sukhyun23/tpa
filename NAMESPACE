@@ -2,15 +2,26 @@
 
 import(dplyr)
 import(ggplot2)
-import(shinydashboard)
 
 export(
-  calendar, pre_date, preprocess_basic, preprocess_time
-  summary_wage, montly_plot
+  summary2, remove_na, scaler, is.quan, is.qual, is.date,
+  get_mode, ggcorr_plot, ggrpart_plot, cv_glmnet_coef,
+  grid_number, impurity, linear_formula, poly_formula, 
+  inter_formula, full_formula, revision_formula, na_ratio,
+  minmax_norm, minmax_norm_reverse, 
+  normal_norm, normal_norm_reverse, 
+  scatter_xy, similar_string
 )
 
-# S3method("summary2", "Date")
-# S3method("summary2", "POSIXct")
+S3method("summary2", "Date")
+S3method("summary2", "POSIXct")
+S3method("summary2", "character")
+S3method("summary2", "factor")
+S3method("summary2", "numeric")
+S3method("summary2", "data.frame")
 
-# S3method("scaler", "data.frame")
-# S3method("predict", "scaler")
+S3method("remove_na", "data.frame")
+S3method("remove_na", "data.table")
+
+S3method("scaler", "data.frame")
+S3method("predict", "scaler")
