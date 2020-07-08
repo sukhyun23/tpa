@@ -35,13 +35,15 @@ surface.gam <- function(object, view = NULL, n.grid = 30) {
   z <- t(matrix(design$lp, ncol = n.grid, nrow = n.grid))
   
   # matrix
-  plotly::plot_ly(x = v1, y = v2) %>% plotly::add_surface(z = z) %>% 
-    plotly::layout(
-      scene = list(
-        xaxis = list(title = view[1]), 
-        yaxis = list(title = view[2]),
-        zaxis = list(title = 'linear predictor')
-      )
+  plotly_obj <- plotly::plot_ly(x = v1, y = v2) 
+  plotly_obj <- plotly::add_surface(p = plotly_obj, z = z)
+  plotly_obj <- plotly::layout(
+    p = plotly_obj,
+    scene = list(
+      xaxis = list(title = view[1]), 
+      yaxis = list(title = view[2]),
+      zaxis = list(title = 'linear predictor')
     )
-  invisible(NULL)
+  )
+  return(plotly_obj)
 }
