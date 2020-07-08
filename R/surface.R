@@ -35,8 +35,8 @@ surface.gam <- function(object, view = NULL, n.grid = 30) {
   z <- matrix(design$lp, ncol = n.grid, nrow = n.grid) %>% t()
   
   # matrix
-  plotly::plot_ly(x = v1, y = v2) %>% add_surface(z = z) %>% 
-    layout(
+  plotly::plot_ly(x = v1, y = v2) %>% plotly::add_surface(z = z) %>% 
+    plotly::layout(
       scene = list(
         xaxis = list(title = view[1]), 
         yaxis = list(title = view[2]),
