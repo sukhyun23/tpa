@@ -32,7 +32,7 @@ surface.gam <- function(object, view = NULL, n.grid = 30) {
   design <- do.call(expand.grid, grid)
   design <- cbind(design, design_others)
   design$lp <- predict(object = object, newdata = design) # linear predictor
-  z <- matrix(design$lp, ncol = n.grid, nrow = n.grid) %>% t()
+  z <- t(matrix(design$lp, ncol = n.grid, nrow = n.grid))
   
   # matrix
   plotly::plot_ly(x = v1, y = v2) %>% plotly::add_surface(z = z) %>% 

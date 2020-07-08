@@ -11,6 +11,10 @@ export(
   minmax_norm, minmax_norm_reverse, normal_norm, normal_norm_reverse, 
   scatter_xy, similar_string, surface
 )
+export("%$%")
+export("%<>%")
+export("%>%")
+export("%T>%")
 
 S3method("summary2", "Date")
 S3method("summary2", "POSIXct")
