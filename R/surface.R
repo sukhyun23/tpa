@@ -30,7 +30,9 @@ surface.gam <- function(object, view = NULL, n.grid = 30) {
   v2 <- grid[[view[2]]]
   
   design <- do.call(expand.grid, grid)
-  design <- cbind(design, design_others)
+  if (nrow(design_others) >= 1) {
+    design <- cbind(design, design_others)  
+  }
   design$lp <- predict(object = object, newdata = design) # linear predictor
   z <- t(matrix(design$lp, ncol = n.grid, nrow = n.grid))
   
