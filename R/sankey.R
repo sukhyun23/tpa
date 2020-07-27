@@ -99,12 +99,11 @@ sankey.sankey_df <- function(object, palette = 'Set1', tables = FALSE, title = '
   return(p)
 }
 
-data <- ggplot2::diamonds
-data$cut <- gsub(' ', '', data$cut)
-vars <- c('cut', 'color', 'clarity')
-object <- sankey(data, vars)
-sankey(object)
-
+# data <- ggplot2::diamonds
+# data$cut <- gsub(' ', '', data$cut)
+# vars <- c('cut', 'color', 'clarity')
+# object <- sankey(data, vars)
+# sankey(object)
 
 # dat <- data.table::fread('/home/sukhyun/dataset/campus/Placement_Data_Full_Class.csv')
 # data <- data.frame(dat)
