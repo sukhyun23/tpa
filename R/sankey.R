@@ -1,9 +1,3 @@
-# dat <- data.table::fread('/home/sukhyun/dataset/campus/Placement_Data_Full_Class.csv')
-# data <- data.frame(dat)
-# vars <- c('gender', 'hsc_b', 'degree_t', 'status')
-# object <- sankey(data = data, vars = vars)
-# sankey(object, tables = T)
-
 sankey <- function(...) UseMethod('sankey')
 
 sankey.data.frame <- function(data, vars) {
@@ -32,6 +26,8 @@ sankey.data.frame <- function(data, vars) {
     dsub <- d[,v]
     result <- aggregate(rep(1, nrow(dsub)), dsub, sum)
     names(result) <- c('source', 'target', 'value')
+    result$source <- as.character(result$source)
+    result$target <- as.character(result$target)
     result
   }
   
@@ -51,21 +47,28 @@ sankey.data.frame <- function(data, vars) {
   sankey_dat$target <- as.numeric(factor(sankey_dat$target, label))-1
   
   result <- list(sankey_dat = sankey_dat, label = label, tab_list = tab_list)
-  result <- structure(result, class = 'sankeytab')
+  result <- structure(result, class = 'sankey_df')
   return(result)
 }
 
-sankey.sankeytab <- function(object, palette = 'Set1', tables = FALSE, title = '') {
+sankey.sankey_df <- function(object, palette = 'Set1', tables = FALSE, title = '') {
   # info
   sankey_dat <- object$sankey_dat
   label <- object$label
   tab_list <- object$tab_list
   
   # color
-  color <- suppressWarnings(
-    RColorBrewer::brewer.pal(length(label), palette)
-  )
+  color <- suppressWarnings(RColorBrewer::brewer.pal(length(label), palette))
   color <- color[1:length(label)]
+  
+  is_na_col <- is.na(color)
+  while (any(is_na_col)) {
+    na_col_len <- sum(is_na_col)
+    suppressWarnings(
+      color[is_na_col] <- RColorBrewer::brewer.pal(na_col_len, palette)
+    )
+    is_na_col <- is.na(color)
+  }
   
   # plotly
   p <- plotly::plot_ly(
@@ -88,10 +91,23 @@ sankey.sankeytab <- function(object, palette = 'Set1', tables = FALSE, title = '
       value =  sankey_dat$value
     )
   )
-  fig <- plotly::layout(p = p, title = title, font = list(size = 10))
+  p <- plotly::layout(p = p, title = title, font = list(size = 10))
   
   if (tables) {
     return(list(p = p, tab_list = tab_list))
   }
   return(p)
 }
+
+data <- ggplot2::diamonds
+data$cut <- gsub(' ', '', data$cut)
+vars <- c('cut', 'color', 'clarity')
+object <- sankey(data, vars)
+sankey(object)
+
+
+# dat <- data.table::fread('/home/sukhyun/dataset/campus/Placement_Data_Full_Class.csv')
+# data <- data.frame(dat)
+# vars <- c('gender', 'ssc_b', 'hsc_b', 'hsc_s', 'degree_t', 'workex', 'specialisation', 'status')
+# object <- sankey(data = data, vars = vars)
+# sankey(object, tables = T)

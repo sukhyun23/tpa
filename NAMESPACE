@@ -9,7 +9,7 @@ export(
   grid_number, impurity, linear_formula, poly_formula, 
   inter_formula, full_formula, revision_formula, na_ratio,
   minmax_norm, minmax_norm_reverse, normal_norm, normal_norm_reverse, 
-  scatter_xy, similar_string, surface, sankey
+  scatter_xy, similar_string, surface, sankey, sunburst
 )
 
 S3method("summary2", "Date")
@@ -28,4 +28,7 @@ S3method("predict", "scaler")
 S3method("surface", "gam")
 
 S3method("sankey", "data.frame")
-S3method("sankey", "sankeytab")
+S3method("sankey", "sankey_df")
+
+S3method("sunburst", "data.frame")
+S3method("sunburst", "sunburst_df")

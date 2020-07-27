@@ -1,8 +1,9 @@
 surface <- function(object, ...) UseMethod('surface')
-surface.gam <- function(object, view = NULL, n.grid = 30) {
+
+surface.gam <- function(object, view, n.grid = 30) {
   # arguments
   varnames <- names(object$var.summary)
-  if (is.null(view)) {
+  if (missing(view)) {
     view <- varnames[1:2]
   }
   others <- varnames[!varnames %in% view]
