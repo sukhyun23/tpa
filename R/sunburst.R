@@ -17,11 +17,16 @@ sunburst.data.frame <- function(data, vars, center) {
         names(tab) <- v
       }
       parents <- c(parents, v)
-      result <- append(result, tab)
+      if (length(tab) >= 1) {
+        result <- append(result, tab)  
+      }
     }
     recurse(data, vars[-1], parents, result = result)
   }
   tab_list <- recurse(data, vars)
+  for (i in seq_along(tab_list)) {
+    tab_list[[i]] <- tab_list[[i]][vapply(tab_list[[i]], length, 1) >= 1]
+  }
   
   # table to data.frame for plotly form 
   result_list <- list()
